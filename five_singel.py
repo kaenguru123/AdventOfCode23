@@ -19,14 +19,16 @@ class five():
 
             self.locations = []
             for seed_start, seed_range in self.seeds:
-                res=[]
                 print(f'new range: {seed_range} (start from: {seed_start})')
                 range_of_seeds = list(range(seed_start, seed_start + seed_range))
+                new_low = -1
                 for seed in range_of_seeds:
                     for map in self.maps:
                         seed = self.mapping(seed, map)
-                    res.append(seed)
-                self.locations.append(min(res))
+                    if new_low > seed or new_low == -1:
+                        new_low = seed
+                print(f"add new: {new_low}")
+                self.locations.append(new_low)
             print(f"lowest location_id: {min(self.locations)}")
 
     def mapping(self, seed, map):
