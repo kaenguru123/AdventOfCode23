@@ -1,3 +1,5 @@
+import threading
+
 class five():
     def __init__(self):
         with open('./input5.txt', 'r') as f:
@@ -17,21 +19,32 @@ class five():
                 new_list1.append(new_list2)
             self.maps = new_list1
 
-            locations = []
+            self.locations = []
+            threads = []
+            thr_cnt = 0
             for seed_start, seed_range in self.seeds:
-                cnt = 0
-                print(f'new range: {seed_range} (start from: {seed_start})')
-                range_of_seeds = list(range(seed_start, seed_start + seed_range))
-                tenths = seed_range/1000
-                for seed in range_of_seeds:
-                    for map in self.maps:
-                        seed = self.mapping(seed, map)
-                    locations.append(seed)
-                    if cnt%tenths==0:
-                        print('#')
-                    cnt+=1
-            print(f"lowest location_id: {min(locations)}")
+                thread = threading.Thread(target=self.subthread, args=(seed_start, seed_range))
+                threads.append(thread)
+                thread.start()
+                print(f"thread {thr_cnt} started")
+                thr_cnt+=1
 
+            for thread in threads:
+                thread.join()
+            print(f"lowest location_id: {min(self.locations)}")
+    
+    def subthread(self, seed_start, seed_range):
+        res = []
+        print(f'new range: {seed_range} (start from: {seed_start})')
+        range_of_seeds = list(range(seed_start, seed_start + seed_range))
+        for seed in range_of_seeds:
+            for map in self.maps:
+                seed = self.mapping(seed, map)
+            res.append(seed)
+        ans = min(res)
+        print(f"add new low-location: {ans}")
+        self.locations.append(ans)
+    
     def mapping(self, seed, map):
         for dest, src, range in map:
             if seed >= src and seed < src+range:
